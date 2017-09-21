@@ -55,6 +55,7 @@ public class StudentDB implements InterfaceStudents {
     }
     @SuppressWarnings("unchecked")
     public ArrayList getLnameValues(String lname) {
+        //searching the object students and return the objects as an array list
         ArrayList values=new ArrayList();
 
         for(int i=0;i<studentList.size();i++){
