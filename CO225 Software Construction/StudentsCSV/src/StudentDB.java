@@ -21,7 +21,7 @@ public class StudentDB implements InterfaceStudents {
              fileReader = new FileReader(csv);
              bufferedReader=new BufferedReader(fileReader);
 
-             studentList=new <Students>ArrayList();
+             studentList=new <Students>ArrayList(); //creating new array list to store objects
              String listValues[];
               for(String line=bufferedReader.readLine();line!=null;line=bufferedReader.readLine()){
                   listValues=line.split(",");
