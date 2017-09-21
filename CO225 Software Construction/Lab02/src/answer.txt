@@ -1,0 +1,11 @@
+
+1. N times operations
+
+2. minimum 3 operations. 
+		if for check the array, take elemnent, then remove item
+	No.
+
+3. Adding value to sorted array is taking more instruction to do it. so better one is 		adding values and then sort the array again	
+4. 1st option is better. because when the nextitem is 0; it return null and stop. so its 	faster than 2nd option.
+
+5. by adding @SuppressWarnings("unchecked") annotation

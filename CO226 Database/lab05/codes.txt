@@ -1,0 +1,456 @@
+#1.
+ #a
+select * from movie where director = any (select name from reviewer);
++-----+---------+------+---------------+
+| id  | title   | year | director      |
++-----+---------+------+---------------+
+| 105 | titanic | 1997 | james cameron |
+| 107 | avatar  | 2009 | james cameron |
++-----+---------+------+---------------+
+2 rows in set (0.01 sec)
+
+ #b
+select * from movie where director != all (select name from reviewer);
++-----+-------------------------+------+------------------+
+| id  | title                   | year | director         |
++-----+-------------------------+------+------------------+
+| 101 | Gone with the wind      | 1939 | victor fleming   |
+| 102 | star wars               | 1977 | george lucas     |
+| 103 | the sound of music      | 1965 | robert wise      |
+| 104 | E.T                     | 1982 | steven spielberg |
+| 108 | raiders of the lost ark | 1981 | steven spielberg |
++-----+-------------------------+------+------------------+
+5 rows in set (0.17 sec)
+
+#2 a.
+ select * from rating where rating.reviewerid = all (select id from reviewer where name='Sarah Martinez');
++------------+---------+-------+---------------------+
+| reviewerid | movieid | stars | date                |
++------------+---------+-------+---------------------+
+|        201 |     101 |     2 | 2011-01-22 00:00:00 |
+|        201 |     101 |     4 | 2011-01-27 00:00:00 |
++------------+---------+-------+---------------------+
+2 rows in set (0.00 sec)
+
+#b
+ select * from rating where rating.reviewerid != all (select id from reviewer where name='Sarah Martinez');
++------------+---------+-------+---------------------+
+| reviewerid | movieid | stars | date                |
++------------+---------+-------+---------------------+
+|        202 |     106 |     4 | NULL                |
+|        203 |     103 |     3 | 2011-01-20 00:00:00 |
+|        203 |     108 |     5 | 2011-01-12 00:00:00 |
+|        203 |     108 |     3 | 2011-01-30 00:00:00 |
+|        204 |     101 |     3 | 2011-01-09 00:00:00 |
+|        205 |     103 |     3 | 2011-01-27 00:00:00 |
+|        205 |     104 |     2 | 2011-01-22 00:00:00 |
+|        205 |     108 |     4 | NULL                |
+|        206 |     107 |     3 | 2011-01-15 00:00:00 |
+|        206 |     106 |     5 | 2011-01-19 00:00:00 |
+|        207 |     107 |     5 | 2011-01-20 00:00:00 |
+|        208 |     104 |     3 | 2011-01-02 00:00:00 |
++------------+---------+-------+---------------------+
+12 rows in set (0.07 sec)
+
+#3
+#a
+ select movieid from rating where rating.stars < any (select stars from rating where movieid=103);
++---------+
+| movieid |
++---------+
+|     101 |
+|     103 |
+|     108 |
+|     104 |
++---------+
+4 rows in set (0.00 sec)
+
+#b
+ select movieid from rating where rating.stars <= any (select stars from rating where movieid=103);
++---------+
+| movieid |
++---------+
+|     101 |
+|     103 |
+|     108 |
+|     101 |
+|     103 |
+|     104 |
+|     107 |
+|     104 |
++---------+
+8 rows in set (0.00 sec)
+
+#c
+ select movieid from rating where rating.stars = any (select stars from rating where movieid=103);
++---------+
+| movieid |
++---------+
+|     101 |
+|     103 |
+|     108 |
+|     101 |
+|     103 |
+|     104 |
+|     107 |
+|     104 |
++---------+
+8 rows in set (0.00 sec)
+
+#d
+ select movieid from rating where rating.stars > any (select stars from rating where movieid=103);
++---------+
+| movieid |
++---------+
+|     101 |
+|     106 |
+|     108 |
+|     101 |
+|     103 |
+|     108 |
+|     107 |
+|     106 |
+|     107 |
+|     104 |
++---------+
+10 rows in set (0.00 sec)
+
+ select movieid from rating where rating.stars > all (select stars from rating where movieid=103);
++---------+
+| movieid |
++---------+
+|     101 |
+|     106 |
+|     108 |
+|     108 |
+|     106 |
+|     107 |
++---------+
+6 rows in set (0.00 sec)
+
+
+#e
+ select movieid from rating where rating.stars >= any (select stars from rating where movieid=103);
++---------+
+| movieid |
++---------+
+|     101 |
+|     101 |
+|     106 |
+|     103 |
+|     108 |
+|     108 |
+|     101 |
+|     103 |
+|     104 |
+|     108 |
+|     107 |
+|     106 |
+|     107 |
+|     104 |
++---------+
+14 rows in set (0.00 sec)
+
+#f
+ select movieid from rating where rating.stars != any (select stars from rating where movieid=103);
++---------+
+| movieid |
++---------+
+|     101 |
+|     101 |
+|     106 |
+|     103 |
+|     108 |
+|     108 |
+|     101 |
+|     103 |
+|     104 |
+|     108 |
+|     107 |
+|     106 |
+|     107 |
+|     104 |
++---------+
+14 rows in set (0.00 sec)
+
+or
+
+select movieid from rating where rating.stars != all (select stars from rating where movieid=103);
++---------+
+| movieid |
++---------+
+|     101 |
+|     106 |
+|     108 |
+|     108 |
+|     106 |
+|     107 |
++---------+
+6 rows in set (0.56 sec)
+
+
+
+#4
+select reviewerid from rating where movieid = any (Select movieid from rating) and stars =any(select stars from rating) and date='2011-01-12';
++------------+
+| reviewerid |
++------------+
+|        203 |
++------------+
+1 row in set (0.00 sec)
+
+#5
+ #a
+  select distinct year from movie,rating where movie.id=rating.movieid and( stars=4 or stars =5) order by year(date) ASC;
++------+
+| year |
++------+
+| 1937 |
+| 1939 |
+| 2009 |
+| 1981 |
++------+
+4 rows in set (0.00 sec)
+
+#b
+ select year from movie where movie.id in (select movieid from rating where ( stars=4 or stars =5)) order by movie.year;
++------+
+| year |
++------+
+| 1937 |
+| 1939 |
+| 1981 |
+| 2009 |
++------+
+4 rows in set (0.11 sec)
+
+#6
+#a
+ select title from movie where id not in( select movieid from rating);
++-----------+
+| title     |
++-----------+
+| star wars |
+| titanic   |
++-----------+
+2 rows in set (0.00 sec)
+
+#b
+ select title from movie where id not in( select movieid from rating where movie.id=rating.movieid);
++-----------+
+| title     |
++-----------+
+| star wars |
+| titanic   |
++-----------+
+2 rows in set (0.00 sec)
+
+#7 NOT GIVEN IN TUTE
+
+#8
+#a
+select name from reviewer,rating where reviewer.id=rating.reviewerid and date is null;
++---------------+
+| name          |
++---------------+
+| daniel lewis  |
+| chris jackson |
++---------------+
+2 rows in set (0.00 sec)
+
+#b
+select name from reviewer where reviewer.id in (select rating.reviewerid from rating where date is null);
++---------------+
+| name          |
++---------------+
+| daniel lewis  |
+| chris jackson |
++---------------+
+2 rows in set (0.00 sec)
+
+#c
+ select name from reviewer where reviewer.id in (select rating.reviewerid from rating where date is null and reviewer.id=rating.reviewerid);
++---------------+
+| name          |
++---------------+
+| daniel lewis  |
+| chris jackson |
++---------------+
+2 rows in set (0.00 sec)
+
+
+#9
+
+#a
+select movie.title,rating.stars from rating,movie where rating.stars=(select Max(rating.stars)from rating) and  movie.id=rating.movieid group by movie.title asc;
++------------+-------+
+| title      | stars |
++------------+-------+
+| avatar     |     5 |
+| snow white |     5 |
++------------+-------+
+2 rows in set (0.00 sec)
+
+#b
+ select movie.title,rating.stars from rating,movie where rating.stars=(select Min(rating.stars)from rating) and  movie.id=rating.movieid group by movie.title asc;
++-------------------------+-------+
+| title                   | stars |
++-------------------------+-------+
+| E.T                     |     2 |
+| Gone with the wind      |     2 |
+| raiders of the lost ark |     2 |
+| the sound of music      |     2 |
++-------------------------+-------+
+4 rows in set (0.00 sec)
+
+#c
+select movie.title,avg(rating.stars) from rating,movie where   movie.id=rating.movieid group by movie.title asc;
++-------------------------+-------------------+
+| title                   | avg(rating.stars) |
++-------------------------+-------------------+
+| avatar                  |            4.0000 |
+| E.T                     |            2.5000 |
+| Gone with the wind      |            3.0000 |
+| raiders of the lost ark |            3.3333 |
+| snow white              |            4.5000 |
+| the sound of music      |            2.5000 |
++-------------------------+-------------------+
+6 rows in set (0.11 sec)
+
+#d
+select movie.title,sum(rating.stars) from rating,movie where   movie.id=rating.movieid group by movie.title asc;
++-------------------------+-------------------+
+| title                   | sum(rating.stars) |
++-------------------------+-------------------+
+| avatar                  |                 8 |
+| E.T                     |                 5 |
+| Gone with the wind      |                 9 |
+| raiders of the lost ark |                10 |
+| snow white              |                 9 |
+| the sound of music      |                 5 |
++-------------------------+-------------------+
+6 rows in set (0.00 sec)
+
+#e
+select movie.title,count(rating.stars) from rating,movie where   movie.id=rating.movieid group by movie.title asc;
++-------------------------+---------------------+
+| title                   | count(rating.stars) |
++-------------------------+---------------------+
+| avatar                  |                   2 |
+| E.T                     |                   2 |
+| Gone with the wind      |                   3 |
+| raiders of the lost ark |                   3 |
+| snow white              |                   2 |
+| the sound of music      |                   2 |
++-------------------------+---------------------+
+6 rows in set (0.00 sec)
+
+
+#10
+ #a
+ select name from (reviewer join rating  on reviewer.id=rating.reviewerid) group by rating.reviewerid having count(stars)>=3;
++-----------------+
+| name            |
++-----------------+
+| brittany harris |
+| chris jackson   |
++-----------------+
+2 rows in set (0.00 sec)
+
+#b
+select name from reviewer where reviewer.id in (select reviewerid from rating group by reviewerid having count(stars)>=3);
++-----------------+
+| name            |
++-----------------+
+| brittany harris |
+| chris jackson   |
++-----------------+
+2 rows in set (0.00 sec)
+
+
+#c
+ select name from (reviewer join rating  on reviewer.id=rating.reviewerid) group by rating.reviewerid having count(stars)>=3;
++-----------------+
+| name            |
++-----------------+
+| brittany harris |
+| chris jackson   |
++-----------------+
+2 rows in set (0.00 sec)
+
+
+#11
+select title, avg(stars) from rating,movie where movie.id=rating.movieid group by title order by avg( stars) desc;
++-------------------------+------------+
+| title                   | avg(stars) |
++-------------------------+------------+
+| snow white              |     4.5000 |
+| avatar                  |     4.0000 |
+| raiders of the lost ark |     3.3333 |
+| Gone with the wind      |     3.0000 |
+| E.T                     |     2.5000 |
+| the sound of music      |     2.5000 |
++-------------------------+------------+
+6 rows in set (0.00 sec)
+
+#12
+delete from rating where rating.movieid in (select id from movie where year(date)<1970 or year(date)>2000);
+Query OK, 9 rows affected (0.00 sec)
+
+#13
+delete from rating where year(date) is null;
+Query OK, 1 row affected (0.00 sec)
+
+#14
+ insert into rating (movieid,reviewerid) select movie.id,reviewer.id from movie,reviewer where reviewer.id=207;
+Query OK, 8 rows affected (0.15 sec)
+Records: 8  Duplicates: 0  Warnings: 0
+
+ update rating set stars=5 ;
+Query OK, 8 rows affected (0.15 sec)
+Rows matched: 8  Changed: 8  Warnings: 0
+
+select * from rating;
++------------+---------+-------+------+
+| reviewerid | movieid | stars | date |
++------------+---------+-------+------+
+|        207 |     101 |     5 | NULL |
+|        207 |     102 |     5 | NULL |
+|        207 |     103 |     5 | NULL |
+|        207 |     104 |     5 | NULL |
+|        207 |     105 |     5 | NULL |
+|        207 |     106 |     5 | NULL |
+|        207 |     107 |     5 | NULL |
+|        207 |     108 |     5 | NULL |
++------------+---------+-------+------+
+8 rows in set (0.00 sec)
+
+#15
+
+ update movie
+    -> set year=year+25
+    -> where movie.id=any(select movieid from rating group by movieid having avg(stars)>=4);
+Query OK, 8 rows affected (0.05 sec)
+Rows matched: 8  Changed: 8  Warnings: 0
+
+MariaDB [e14084lab04]> select * from movie;
++-----+-------------------------+------+------------------+
+| id  | title                   | year | director         |
++-----+-------------------------+------+------------------+
+| 101 | Gone with the wind      | 1964 | victor fleming   |
+| 102 | star wars               | 2002 | george lucas     |
+| 103 | the sound of music      | 1990 | robert wise      |
+| 104 | E.T                     | 2007 | steven spielberg |
+| 105 | titanic                 | 2022 | james cameron    |
+| 106 | snow white              | 1962 | NULL             |
+| 107 | avatar                  | 2034 | james cameron    |
+| 108 | raiders of the lost ark | 2006 | steven spielberg |
++-----+-------------------------+------+------------------+
+8 rows in set (0.00 sec)
+
+
+
+
+
+
+
